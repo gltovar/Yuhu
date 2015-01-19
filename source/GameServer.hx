@@ -7,8 +7,10 @@ import neko.net.ThreadServer;
 import haxe.io.Bytes;
 
 /**
- * ...
- * @author Samuel Bouchet
+ * following this from: http://ludumdare.com/compo/2014/12/14/a-72h-mmo-game-from-theme-to-reality/
+ * @author Samuel Bouchet (original)
+ * 
+ * Will be modifying it moving forward
  */
 typedef Client = {
   var id : Int;
