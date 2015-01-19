@@ -20,6 +20,21 @@ typedef Message = {
   var str : String;
 }
 
+typedef Room = {
+	var id:Int;
+	var users:Array<Int>;
+}
+
+typedef Game = {
+	var room:Int;
+	var deck:Array<Card>;
+}
+
+typedef Card = {
+	var color:Int;
+	var number:Int;
+}
+
 class GameServer extends ThreadServer<Client, Message>
 {
 	function new() { super(); }
@@ -60,6 +75,32 @@ class GameServer extends ThreadServer<Client, Message>
 	override function clientMessage( c : Client, msg : Message )
 	{
 		Lib.println(c.id + " sent "+msg.str.length+" bytes  (" + msg.str+")");
+	}
+	
+	
+	private function addClientToLobby( c:Client ):Void
+	{
+		
+	}
+	
+	private function clientChatToLobby( c:Client ):Void
+	{
+		
+	}
+	
+	private function clientCreateRoom( e:Client ):Void
+	{
+		
+	}
+	
+	private function clientJoinRoom( e:Client ):Void
+	{
+		
+	}
+	
+	private function clientHostStartGame( e:Client ):Void
+	{
+		
 	}
 
 	static function main() {
