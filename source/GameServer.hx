@@ -6,24 +6,20 @@ import sys.net.Socket;
 import neko.net.ThreadServer;
 import haxe.io.Bytes;
 
+import server.Client;
+import server.Room;
+
 /**
  * following this from: http://ludumdare.com/compo/2014/12/14/a-72h-mmo-game-from-theme-to-reality/
  * @author Samuel Bouchet (original)
  * 
  * Will be modifying it moving forward
  */
-typedef Client = {
-  var id : Int;
-}
 
 typedef Message = {
-  var str : String;
+	var str : String;
 }
 
-typedef Room = {
-	var id:Int;
-	var users:Array<Int>;
-}
 
 typedef Game = {
 	var room:Int;
@@ -39,16 +35,37 @@ class GameServer extends ThreadServer<Client, Message>
 {
 	function new() { super(); }
 	
+	
+	static var clientMap:Map<Int, Client>;
+	static var roomMap:Map<Client,Room>;
+	static var lobby:Room;
 	static var clientNumber:Int = 0;
+	static var roomNumber:Int = 0;
+	
+	static var server:GameServer;
 	
 	// create a Client
 	override function clientConnected( s : Socket ) : Client
 	{
-		var num = clientNumber++;
-		Lib.println("client " + num + " is " + s.peer());
-		s.output.writeString("Roger");
-		s.output.flush();
-		return { id: num };
+		var client:Client = new Client( getNewClientId(), s );
+		clientMap[client.id] = client;
+		
+		addClientToLobby(client);
+		
+		
+		Lib.println("client " + client.id + " is " + s.peer());
+		
+		return client;
+	}
+	
+	static function getNewClientId():Int
+	{
+		return ++clientNumber;
+	}
+	
+	static function getNewRoomId():Int
+	{
+		return ++roomNumber;
 	}
 
 	override function clientDisconnected( c : Client )
@@ -69,7 +86,8 @@ class GameServer extends ThreadServer<Client, Message>
 		//Lib.println(buf.getString(pos, cpos-pos));
 		
 		//var end:Int = bytesIn.readByte();
-		return {msg: {str: txt + " : "+x+", "+y+", "+txt+":"+txtlen}, bytes: len};
+		return { msg: { str: txt + " : " + x + ", " + y + ", " + txt + ":" + txtlen }, bytes: len };
+		
 	}
 
 	override function clientMessage( c : Client, msg : Message )
@@ -80,7 +98,7 @@ class GameServer extends ThreadServer<Client, Message>
 	
 	private function addClientToLobby( c:Client ):Void
 	{
-		
+		lobby.addClientToRoom( c );
 	}
 	
 	private function clientChatToLobby( c:Client ):Void
@@ -105,7 +123,12 @@ class GameServer extends ThreadServer<Client, Message>
 
 	static function main() {
 		
-		var server = new GameServer();
+		clientMap = new Map<Int, Client>();
+		roomMap = new Map<Client,Room>();
+		lobby = new Room( getNewRoomId() );
+		lobby.id = -1;
+		
+		server = new GameServer();
 		trace("Starting server...");
 		server.run("localhost", 2000);
 		
